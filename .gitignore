@@ -1,0 +1,22 @@
+# Virtual environment
+.venv/
+
+# Byte-compiled files
+__pycache__/
+*.pyc
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Collected output. NEVER commit this: it contains personal data about real people.
+runs/
+
+# Local operator configuration (may contain a contact email).
+osint-scrapper.toml

@@ -1,0 +1,73 @@
+# Copy to ./osint-scrapper.toml, or to $XDG_CONFIG_HOME/osint-scrapper/config.toml.
+# Precedence: interface control > environment variable > this file > built-in default.
+#
+# A value outside its documented bounds is clamped rather than refused, and the
+# Settings pane reports every clamp it applied.
+
+[http]
+# Required. The application refuses to start a crawl without an address someone
+# can answer, because it goes into the User-Agent of every request it makes.
+# Environment override: OSINT_SCRAPPER_CONTACT_EMAIL
+contact_email = "you@example.org"
+
+# Environment override: OSINT_SCRAPPER_PROJECT_URL
+project_url = "https://github.com/TonioCodeur/OSINT_Scrapper"
+
+# Minimum seconds between the starts of two requests to the same host. This is a
+# floor: the 0.5 s hard floor and a host's Crawl-delay can raise it, and nothing
+# anywhere can lower it. Range 0.5 to 60.0.
+request_interval_seconds = 1.0
+
+# Connect and read timeout, in seconds.
+timeout_seconds = 10.0
+
+# Retries on 500, 502, 503 and 504, with exponential backoff and jitter.
+# 429 is deliberately not retried here: repeated 429 aborts the crawl.
+max_retries = 3
+
+# Requests in flight against the target host. Range 1 to 4. The rate limiter
+# remains the sole throughput governor, so this hides latency and cannot
+# increase the load on the host.
+concurrent_requests = 2
+
+[crawl]
+# Hard page budget for one run. Range 1 to 2000; counts every content request,
+# including sitemap documents and security.txt, and excludes robots.txt.
+max_pages = 200
+
+# Link depth from the target. Range 0 to 10.
+max_depth = 3
+
+# Confinement goes down, never up: with this on, seed example.com reaches
+# blog.example.com, but seed docs.example.com never reaches example.com.
+include_subdomains = true
+
+# Read the sitemaps robots.txt declares, or /sitemap.xml when it declares none.
+follow_sitemap = true
+
+# ISO 3166-1 alpha-2 region libphonenumber parses published numbers against.
+phone_region = "FR"
+
+[purpose]
+# Required before any request, including robots.txt. One of:
+# security_assessment, due_diligence, journalism, self_audit,
+# academic_research, other.
+category = "due_diligence"
+
+# Free text. Optional for the five named categories, and mandatory with at
+# least 16 characters when the category is "other".
+note = ""
+
+[output]
+# Where run directories and the run ledger are written.
+# Environment override: OSINT_SCRAPPER_OUTPUT_DIR
+directory = "runs"
+
+# Declared retention period, recorded in every export. The application never
+# deletes anything on its own; the Runs pane offers one-click erasure.
+# Range 1-3650; a value outside it is clamped and the clamp is reported.
+retention_days = 30
+
+# Formats pre-selected in the export dialog. "json" is always written and
+# cannot be deselected: it is the canonical record.
+formats = ["json", "csv", "xlsx"]

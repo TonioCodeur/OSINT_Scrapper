@@ -1,0 +1,7 @@
+Contact: mailto:security@example.com
+Contact: tel:+33123456789
+Contact: https://github.com/example-association
+Contact: https://example.com/report-a-problem
+Encryption: https://example.com/pgp-key.asc
+Expires: 2027-01-01T00:00:00Z
+Preferred-Languages: en, fr

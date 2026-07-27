@@ -1,0 +1,5 @@
+User-agent: OSINT-Scrapper
+Disallow: /mentions-legales
+
+User-agent: *
+Allow: /

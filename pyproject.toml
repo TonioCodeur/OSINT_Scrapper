@@ -1,0 +1,110 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "osint-scrapper"
+version = "0.2.0"
+description = "Desktop application that crawls a website from a domain or page URL and exports the publicly published contact information it finds."
+readme = "README.md"
+# Upper bound imposed by PySide6, which declares Requires-Python >=3.10,<3.15.
+requires-python = ">=3.11,<3.15"
+license = { text = "MIT" }
+authors = [{ name = "OSINT_scrapper contributors" }]
+keywords = ["osint", "scraping", "gdpr", "robots.txt", "qt"]
+classifiers = [
+    "Environment :: X11 Applications :: Qt",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Information Technology",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+# Direct runtime dependencies. Versions are resolved and pinned in the lockfile,
+# never copied from the specification document (SPEC.md NFR-10 / section 3.2).
+dependencies = [
+    "requests>=2.32",        # HTTP client; ships its own type annotations since 2.34.0.
+    "beautifulsoup4>=4.13",  # HTML parsing on the stdlib html.parser backend.
+    "phonenumbers>=8.13",    # libphonenumber port; replaces unsafe regex phone matching.
+    "email-validator>=2.2",  # RFC-correct email validation, DNS checks disabled.
+    "openpyxl>=3.1",         # XLSX writing; no stdlib alternative.
+    "PySide6>=6.9",          # The Qt binding. LGPLv3; see THIRD_PARTY_LICENSES.md and SPEC 3.1.
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-qt>=4.4",  # qtbot fixture for widget smoke tests; MIT.
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/TonioCodeur/OSINT_Scrapper"
+Repository = "https://github.com/TonioCodeur/OSINT_Scrapper"
+
+[project.scripts]
+osint-scrapper = "osint_scrapper.interfaces.launcher:main"
+
+[project.gui-scripts]
+osint-scrapper-gui = "osint_scrapper.interfaces.launcher:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/osint_scrapper"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "C4",   # flake8-comprehensions
+    "SIM",  # flake8-simplify
+    "RET",  # flake8-return
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "TID",  # flake8-tidy-imports
+    "BLE",  # flake8-blind-except
+    "N",    # pep8-naming
+    "ANN",  # flake8-annotations
+    "T20",  # flake8-print
+]
+ignore = [
+    "ANN401",  # Any is used deliberately for decoded JSON payloads.
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Qt's own API is camelCase; overriding a virtual such as `rowCount`, `columnCount`,
+# `headerData` or `filterAcceptsRow` cannot satisfy pep8-naming. This is the only
+# module that subclasses a Qt type imposing such an override, and N802 is the only
+# rule it needs: every signal and attribute it declares is already snake_case.
+"src/osint_scrapper/interfaces/models.py" = ["N802"]
+# --version writes to stdout before any Qt object exists (SPEC 4).
+"src/osint_scrapper/interfaces/launcher.py" = ["T20"]
+"tests/*" = ["ANN", "ARG"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src"]
+warn_unreachable = true
+show_error_codes = true
+
+# openpyxl is the only dependency without a py.typed marker; requests, beautifulsoup4,
+# phonenumbers, email-validator and PySide6 all ship their own annotations (PySide6 as
+# generated .pyi stubs), which is why no stub package is declared (SPEC 3.2).
+[[tool.mypy.overrides]]
+module = ["openpyxl.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
